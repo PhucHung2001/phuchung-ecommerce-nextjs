@@ -33,6 +33,7 @@ const isAuth = async (req, res, next) => {
 };
 const isAdmin = async (req, res, next) => {
   if (req.user.isAdmin) {
+    console.log(req.user.isAdmin);
     next();
   } else {
     res.status(401).send({ message: "User is not admin" });
