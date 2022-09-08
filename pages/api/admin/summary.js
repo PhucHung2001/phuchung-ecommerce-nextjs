@@ -19,7 +19,6 @@ handler.get(async (req, res) => {
   const ordersPriceGroup = await Order.aggregate([
     {
       $group: {
-        // nhóm các document theo điều kiện nhất định
         _id: null,
         sales: { $sum: "$totalPrice" },
       },

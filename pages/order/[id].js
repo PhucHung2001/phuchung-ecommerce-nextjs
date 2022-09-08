@@ -21,12 +21,11 @@ import {
   ListItem,
 } from "@material-ui/core";
 import axios from "axios";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useRouter } from "next/router";
 import useStyles from "../../utils/styles";
 import { useSnackbar } from "notistack";
-import { getError, onError } from "../../utils/error";
-import CheckoutWizard from "../../components/checkoutWizard";
+import { getError } from "../../utils/error";
+import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -61,6 +60,7 @@ function reducer(state, action) {
       state;
   }
 }
+
 function Order({ params }) {
   const orderId = params.id;
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
@@ -68,7 +68,7 @@ function Order({ params }) {
   const router = useRouter();
   const { state } = useContext(Store);
   const { userInfo } = state;
-  const { enqueueSnackbar } = useSnackbar();
+
   const [
     { loading, error, order, successPay, loadingDeliver, successDeliver },
     dispatch,
@@ -93,7 +93,7 @@ function Order({ params }) {
 
   useEffect(() => {
     if (!userInfo) {
-      router.push("/login");
+      return router.push("/login");
     }
     const fetchOrder = async () => {
       try {
@@ -121,7 +121,7 @@ function Order({ params }) {
       }
     } else {
       const loadPaypalScript = async () => {
-        const { data: clientId } = await axios.get(`/api/keys/paypal`, {
+        const { data: clientId } = await axios.get("/api/keys/paypal", {
           headers: { authorization: `Bearer ${userInfo.token}` },
         });
         paypalDispatch({
@@ -136,6 +136,7 @@ function Order({ params }) {
       loadPaypalScript();
     }
   }, [order, successPay, successDeliver]);
+  const { enqueueSnackbar } = useSnackbar();
 
   function createOrder(data, actions) {
     return actions.order
@@ -173,6 +174,7 @@ function Order({ params }) {
   function onError(err) {
     enqueueSnackbar(getError(err), { variant: "error" });
   }
+
   async function deliverOrderHandler() {
     try {
       dispatch({ type: "DELIVER_REQUEST" });
@@ -192,12 +194,10 @@ function Order({ params }) {
   }
 
   return (
-    <Layout title="Order Detail">
-      <CheckoutWizard activeStep={3}></CheckoutWizard>
+    <Layout title={`Order ${orderId}`}>
       <Typography component="h1" variant="h1">
         Order {orderId}
       </Typography>
-
       {loading ? (
         <CircularProgress />
       ) : error ? (
@@ -354,20 +354,6 @@ function Order({ params }) {
                     </Grid>
                   </Grid>
                 </ListItem>
-                {/* {!isPaid && (
-                  <ListItem>
-                    {isPending ? (
-                      <CircularProgress />
-                    ) : (
-                      <PayPalButtons>
-                        createOrder={createOrder}
-                        onApprove={onApprove}
-                        onError={onError}
-                      </PayPalButtons>
-                    )}
-                  </ListItem>
-                )} */}
-
                 {!isPaid && (
                   <ListItem>
                     {isPending ? (
@@ -404,9 +390,9 @@ function Order({ params }) {
     </Layout>
   );
 }
+
 export async function getServerSideProps({ params }) {
-  return {
-    props: { params }, // will be passed to the page component as props
-  };
+  return { props: { params } };
 }
+
 export default dynamic(() => Promise.resolve(Order), { ssr: false });
