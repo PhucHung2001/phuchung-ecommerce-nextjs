@@ -5,7 +5,7 @@ import data from "../../utils/data";
 import User from "../../models/User";
 
 const handler = nc();
-
+//   return res.s
 handler.get(async (req, res) => {
   //   return res.send({ message: 'already seeded' });
   await db.connect();
