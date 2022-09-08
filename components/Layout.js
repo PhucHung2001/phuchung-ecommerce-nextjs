@@ -29,7 +29,7 @@ import { useSnackbar } from "notistack";
 export default function Layout({ title, description, children }) {
   const classes = useStyles();
   const router = useRouter();
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
   const { state, dispatch } = useContext(Store);
   const [anchorEl, setanchorEl] = useState(null);
   const { darkMode, userInfo } = state;
