@@ -80,7 +80,7 @@ export async function getServerSideProps() {
   await db.disconnect();
   return {
     props: {
-      products: JSON.parse(JSON.stringify(products)),
+      products: products.map(db.convertDocToObj),
     },
   };
 }
